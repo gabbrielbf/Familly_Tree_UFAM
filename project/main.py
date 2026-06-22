@@ -180,7 +180,14 @@ class FamilyTreeApp:
                 btn_cou.config(command=lambda: [btn_cou.config(state=tk.DISABLED), self.render_member_node('cousin_maternal', row+1, column, 'uncle_maternal')])
                 btn_cou.pack(pady=4)
 
-        
+        def render_paternal_siblings(self, base_row, start_col):
+            """ Renderiza os 4 irmãos por parte de pai alinhados verticalmente à esquerda, como eu
+            sei que tenho mas não os conheço, isto se tornará padrão sem alterações. """
+
+            for i in range(4):
+                sibling_key = f"paternal_sibling_{i+1}"
+                self.render_member_node(sibling_key, row=base_row + (i - 1), column=start_col, parent_to_shrink='father')
+                
 if __name__ == "__main__":
     root = tk.Tk()
     app = FamilyTreeApp(root)
