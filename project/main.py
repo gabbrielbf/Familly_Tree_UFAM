@@ -70,9 +70,17 @@ class FamilyTreeApp:
         self.active_frames = {}
         self.update_interface_labels()
 
-        self.render_member_node('me', row=4, column=3) # <- Self resposável por inicializar exibindo "Eu" centralizado na cascata
-        
+        self.render_member_node('me', row=4, column=3) # <- Self resposável por inicializar exibindo "Eu" centralizado na cascata.
 
+        # Abaixo teremos as funções responsáveis por realizar a parte transicional e inteligente do projeto
+        def change_language(self, lang):
+            """ Função responsável pela transição simultânea de idioma em todas as tabelas
+            presentes na janela da árvore genealógica """
+
+            self.brain.set_language(lang)
+            self.update_interface_labels()
+            self.refresh_all_displayed_info()
+        
 if __name__ == "__main__":
     root = tk.Tk()
     app = FamilyTreeApp(root)
