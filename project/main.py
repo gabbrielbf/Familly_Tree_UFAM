@@ -14,8 +14,8 @@ class FamilyTreeApp:
         self.brain = FamilyTreeBrain()
 
         self.root.title('Family Cascade System')
-        self.root.geometry('1300x850')
-        self.root.configure(bg='#f1f5f9')
+        self.root.geometry('1300x850') # <- Definindo o tamanho das tabelas
+        self.root.configure(bg='#f1f5f9') # <- Definindo a cor branca como fundo das tabelas de exibição
 
         """ Predefinições das fontes, cores e modelos dos textos exibidos
         em toda a execução do programa. """
@@ -29,3 +29,12 @@ class FamilyTreeApp:
         self.btn_font = ('Segoe UI', 9, 'bold')
 
         """ Barra superior do cabeçario """
+
+        self.top_frame = tk.Frame(self.root, bg='#0f172a', height=80)
+        self.top_frame.pack(fill=tk.X, side=tk.TOP) 
+        self.top_frame.pack_propagate(False)
+
+        self.title_label = tk.Label(self.top_frame, text='', font=self.title_font, fg='#f8fafc', bg='#0f172a')
+        self.title_label.pack(side=tk.LEFT, padx=35, pady=20)
+
+        """ Personalização e configuração dos botões de cabeçario """
