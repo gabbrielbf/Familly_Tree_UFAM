@@ -37,4 +37,18 @@ class FamilyTreeApp:
         self.title_label = tk.Label(self.top_frame, text='', font=self.title_font, fg='#f8fafc', bg='#0f172a')
         self.title_label.pack(side=tk.LEFT, padx=35, pady=20)
 
-        """ Personalização e configuração dos botões de cabeçario """
+        """ Personalização e configuração dos botões de IDIOMA """
+
+        self.lang_frame = tk.Frame(self.top_frame, bg='#0f172a')
+        self.lang_frame.pick(side=tk.RIGHT, padx=35, pady=20)
+
+        self.btn_en = tk.Button(self.lang_frame, text='EN', command=lambda: self.change_lenguage('en'), font=self.lang_font, 
+                    bg='#334155', fg='#f8fafc', activebackground='#1e293b', relief= tk.FLAT, cursor='hand2', width=5)
+        self.btn_en.pack(side=tk.RIGHT, padx=5) # <- Estes comandos "btn_en" são responsáveis por transicionar todo o conteúdo da página para inglês
+                                                # Usaremos a mesma metologia para o código de baixo, no qual inveterá para português.
+
+        self.btn_pt = tk.Button(self.lang_frame, text='PT', command=lambda: self.change_lenguage('pt'), font=self.lang_font, 
+                    bg='#334155', fg='#f8fafc', activebackground='#1e293b', relief= tk.FLAT, cursor='hand2', width=5)
+        self.btn_pt.pack(side=tk.RIGHT, padx=5)
+
+        """ Área rolável para conseguir realizar a exibição de cada item da página """
