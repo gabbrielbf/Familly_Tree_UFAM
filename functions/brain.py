@@ -1,3 +1,5 @@
+# functions/brain.py
+
 class FamilyTreeBrain:
     def __init__(self):
         self.current_lang = 'pt'
@@ -75,3 +77,22 @@ class FamilyTreeBrain:
                 'paternal_sibling_4': {'name': "Sibling 4", 'age': "X years old", 'bio': "Your fourth sibling from your father's side."}
             }
         }
+
+    def set_language(self, lang):
+        """ Função designada a transição de idioma para compreensão
+        do usuário ou telespectador. """
+
+        if lang in ['pt', 'en']:
+            self.current_lang = lang
+
+    def get_text(self, key):
+        """ Função designada para definir o idioma em si, esse seria o cérebro
+        da função acima. """
+
+        return self.translations[self.current_lang].get(key, key)
+
+    def get_member_info(self, member_id):
+        """ Função designada para encontrar o usuário respectivo dentro
+        das listas de dicionários. """
+
+        return self.members_data[self.current_lang].get(member_id, {'name': "N/A", 'age': "N/A", 'bio': ""})
