@@ -80,7 +80,23 @@ class FamilyTreeApp:
             self.brain.set_language(lang)
             self.update_interface_labels()
             self.refresh_all_displayed_info()
+
+        def update_interface_labels(self):
+            """ Função responsável para trasicionar as cores dos botões de PT para EN
+            ou vice e versa."""
+
+            self.title_label.config(text=self.brain.get_text('title'))
+            if self.brain.current_lang == 'en':
+                self.btn_en.config(bg="#38bdf8", fg="#0f172a")
+                self.btn_pt.config(bg="#334155", fg="#94a3b8")
+            else:
+                self.btn_pt.config(bg="#38bdf8", fg="#0f172a")
+                self.btn_en.config(bg="#334155", fg="#94a3b8")
         
+        def shrink_parent_node(self, member_id):
+            """ Encolhe o card pai para otimizar o espaço visual quando novos cards surgem. """
+            pass
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = FamilyTreeApp(root)
