@@ -82,7 +82,7 @@ class FamilyTreeApp:
             self.refresh_all_displayed_info()
 
         def update_interface_labels(self):
-            """ Função responsável para trasicionar as cores dos botões de PT para EN
+            """ Função responsável por trasicionar as cores dos botões de PT para EN
             ou vice e versa."""
 
             self.title_label.config(text=self.brain.get_text('title'))
@@ -94,8 +94,14 @@ class FamilyTreeApp:
                 self.btn_en.config(bg="#334155", fg="#94a3b8")
         
         def shrink_parent_node(self, member_id):
-            """ Encolhe o card pai para otimizar o espaço visual quando novos cards surgem. """
-            pass
+            """ Função que vai enconlher o card pai para otimizar o espaço visual quando novos cards surgem. """
+
+            if member_id in self.active_widgets:
+                widgets = self.active_widgets[member_id]
+            if 'bio_label' in widgets and widgets['bio_label'].winfo_exists():
+                widgets['bio_label'].pack_forget()
+            if 'img_label' in widgets and widgets['img_label'].winfo_exists():
+                widgets['img_label'].config(height=2, text="[ Mini Photo ]")
 
 if __name__ == "__main__":
     root = tk.Tk()
