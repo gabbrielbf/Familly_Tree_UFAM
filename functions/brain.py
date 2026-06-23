@@ -72,7 +72,7 @@ class FamilyTreeBrain:
                 'maternal_sibling_2': {'name': "Estephanny Casemiro Bastos", 'age': "16 anos", 'bio': "Estuda no ensino médio e cursa um curso técnico de enfermagem.", 'image': "foto_irma2.JPG"}
             },
             'en': {
-                'me': {'name': "Your Name", 'age': "23 years old", 'bio': "ADS and English student. Passionate about technology and development.", 'image': "foto_minha.jpeg"},
+                'me': {'name': "Kelvyson Gabriel Bastos", 'age': "23 years old", 'bio': "ADS and English student. Passionate about technology and development.", 'image': "foto_minha.jpeg"},
                 'father': {'name': "Kelson Lima", 'age': "45 years old", 'bio': "He used to be a singer; today, he works in a variety store.", 'image': "foto_pai.JPG"},
                 'mother': {'name': "Gilmara Bastos", 'age': "41 years old", 'bio': "She has a shop selling religious clothing and assorted items.", 'image': "foto_mae.JPG"},
                 'maternal_grandfather': {'name': "Gilson Bastos", 'age': "66 years old", 'bio': "He worked in politics as a city councilor and is now retired.", 'image': "foto_avo1.JPG"},
