@@ -107,6 +107,10 @@ class FamilyTreeApp:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             img_path = os.path.join(base_dir, "assets", image_name)
             if os.path.exists(img_path):
+                # Se for o Zezin, forçamos um tamanho bem maior para destaque na apresentação
+                if image_name == "gato_zezin.jpeg":
+                    size = (320, 320)
+                    
                 img = Image.open(img_path)
                 
                 # Definição padrão de centralização (meio do quadrado)
@@ -154,7 +158,8 @@ class FamilyTreeApp:
             btn_text = "Ver Mascote" if is_pt else "View Pet"
             
             btn_z = tk.Button(self.me_btn_container, text=btn_text, bg="#10b981", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
-            btn_z.config(command=lambda: [btn_z.config(state=tk.DISABLED), self.render_member_node('zezin_mascote', row=5, column=4, parent_to_shrink='me')])
+            # Corrigido de volta para row=5, column=3 para que fique perfeitamente abaixo de "Eu" sem sobrepor a mãe
+            btn_z.config(command=lambda: [btn_z.config(state=tk.DISABLED), self.render_member_node('zezin_mascote', row=5, column=3, parent_to_shrink='me')])
             btn_z.pack(side=tk.LEFT, padx=4)
             self.active_widgets['me']['flow_buttons']['btn_zezin'] = btn_z
 
@@ -185,7 +190,7 @@ class FamilyTreeApp:
                 'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
             }
         else:
-            info = self.brain.get_member_info(member_id)
+            info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
             
         photo = self.load_and_resize_image(info.get('image'))
         
@@ -230,7 +235,7 @@ class FamilyTreeApp:
                 'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
             }
         else:
-            info = self.brain.get_member_info(member_id)
+            info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
         
         # Sistema redundante de tradução segura para evitar exibição das chaves de texto cruas do arquivo 'brain.py'
         is_pt = getattr(self.brain, 'current_lang', 'pt') == 'pt'
@@ -277,12 +282,12 @@ class FamilyTreeApp:
         # Lógica de Fluxo e Direcionamento da Cascata
         if member_id == 'me':
             btn_f = tk.Button(btn_container, text=self.brain.get_text('btn_father'), bg="#0ea5e9", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
-            btn_f.config(command=lambda: [btn_f.config(state=tk.DISABLED), self.render_member_node('father', row-1, column-1, 'me')])
+            btn_f.config(command=lambda: [btn_f.config(state=tk.DISABLED), self.render_member_node('father', row, column-1, 'me')])
             btn_f.pack(side=tk.LEFT, padx=4)
             self.active_widgets[member_id]['flow_buttons']['btn_father'] = btn_f
             
             btn_m = tk.Button(btn_container, text=self.brain.get_text('btn_mother'), bg="#ec4899", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
-            btn_m.config(command=lambda: [btn_m.config(state=tk.DISABLED), self.render_member_node('mother', row-1, column+1, 'me')])
+            btn_m.config(command=lambda: [btn_m.config(state=tk.DISABLED), self.render_member_node('mother', row, column+1, 'me')])
             btn_m.pack(side=tk.LEFT, padx=4)
             self.active_widgets[member_id]['flow_buttons']['btn_mother'] = btn_m
             
@@ -302,12 +307,12 @@ class FamilyTreeApp:
             self.active_widgets[member_id]['flow_buttons']['btn_maternal_grandparents'] = btn_g
             
             btn_un = tk.Button(btn_container, text=self.brain.get_text('btn_uncle'), bg="#f59e0b", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
-            btn_un.config(command=lambda: [btn_un.config(state=tk.DISABLED), self.render_member_node('uncle_maternal', row, column+2, 'mother')])
+            btn_un.config(command=lambda: [btn_un.config(state=tk.DISABLED), self.render_member_node('uncle_maternal', row, column+1, 'mother')])
             btn_un.pack(side=tk.LEFT, padx=4)
             self.active_widgets[member_id]['flow_buttons']['btn_uncle'] = btn_un
 
             btn_msib = tk.Button(btn_container, text=self.brain.get_text('btn_maternal_siblings'), bg="#a855f7", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
-            btn_msib.config(command=lambda: [btn_msib.config(state=tk.DISABLED), self.render_maternal_siblings(row, column+3)])
+            btn_msib.config(command=lambda: [btn_msib.config(state=tk.DISABLED), self.render_maternal_siblings(row+1, column)])
             btn_msib.pack(pady=4)
             self.active_widgets[member_id]['flow_buttons']['btn_maternal_siblings'] = btn_msib
             
@@ -369,7 +374,7 @@ class FamilyTreeApp:
                         'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if is_pt else 'The companion cat of the house, loves to sleep next to the keyboard.'
                     }
                 else:
-                    info = self.brain.get_member_info(member_id)
+                    info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
 
                 if 'name_label' in data and data['name_label'].winfo_exists():
                     data['name_label'].configure(text=f"{label_name_text}: {info.get('name')}")
