@@ -4,7 +4,7 @@ Este é um projeto desenvolvido para fins de estudo e apresentação em aula. A 
 
 O sistema também conta com suporte a dois idiomas (Português e Inglês) com transição em tempo real e um sistema de enquadramento inteligente de imagens para evitar que os rostos fiquem cortados.
 
-Para substutuir os dados presentes no projeto atual pelos respectivos dados o usuário como, nome, idade, biorafia e foto; Basta apenas ir no arquivo "brain" e substitui-los no "self.members_data" deixarei umas imagens de meus familíares apenas para teste das funcionalidades do programa, as fotos deles não são para fins comerciais!
+Para substutuir os dados presentes no projeto atual pelos respectivos dados o usuário como, nome, idade, biografia e foto; Basta apenas ir no arquivo "brain" e substitui-los no "self.members_data". Deixarei umas imagens de meus familíares apenas para teste das funcionalidades do programa, as fotos deles não são para fins comerciais!
 
 ---
 
