@@ -6,7 +6,7 @@ import sys
 import os
 from PIL import Image, ImageTk, ImageOps
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # <- Comando designado para encontrar arquivos e módulos localizados em outras pastas.
 from functions.brain import FamilyTreeBrain # Garante que o Python encontre a pasta das funções
 
 class FamilyTreeApp:
@@ -101,6 +101,7 @@ class FamilyTreeApp:
     def load_and_resize_image(self, image_name, size=(170, 170)):
         """ Função responsável por carregar a imagem da pasta assets, redimensionar
         usando Pillow e preparar para exibição no Tkinter de forma segura. """
+
         if not image_name:
             return None
         try:
@@ -186,8 +187,8 @@ class FamilyTreeApp:
             info = {
                 'image': 'gato_zezin.jpeg',
                 'name': 'Zezin',
-                'age': '2 anos' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '2 years old',
-                'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
+                'age': '1 ano' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '1 year old',
+                'bio': 'O gato companheiro da casa, adora dormir ao lado com as pernas arreganhadas.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The household cat loves sleeping right next to me with its legs up in the air.'
             }
         else:
             info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
@@ -231,8 +232,8 @@ class FamilyTreeApp:
             info = {
                 'image': 'gato_zezin.jpeg',
                 'name': 'Zezin',
-                'age': '2 anos' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '2 years old',
-                'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
+                'age': '1 ano' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '1 year old',
+                'bio': 'O gato companheiro da casa, adora dormir ao lado com as pernas arreganhadas.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The household cat loves sleeping right next to me with its legs up in the air.'
             }
         else:
             info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
@@ -370,8 +371,8 @@ class FamilyTreeApp:
                     info = {
                         'image': 'gato_zezin.jpeg',
                         'name': 'Zezin',
-                        'age': '2 anos' if is_pt else '2 years old',
-                        'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if is_pt else 'The companion cat of the house, loves to sleep next to the keyboard.'
+                        'age': '1 ano' if is_pt else '1 year old',
+                        'bio': 'O gato companheiro da casa, adora dormir ao lado com as pernas arreganhadas.' if is_pt else 'The household cat loves sleeping right next to me with its legs up in the air.'
                     }
                 else:
                     info = self.brain.get_brain_info(member_id) if hasattr(self.brain, 'get_brain_info') else self.brain.get_member_info(member_id)
