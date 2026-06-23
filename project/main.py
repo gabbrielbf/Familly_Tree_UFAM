@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import os
+from PIL import Image, ImageTk, ImageOps
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from functions.brain import FamilyTreeBrain # Garante que o Python encontre a pasta das funções
@@ -70,6 +71,7 @@ class FamilyTreeApp:
         
         self.active_widgets = {}
         self.active_frames = {}
+        self.me_btn_container = None # Container para gerenciar de forma limpa os botões abaixo da sua caixa
 
         self.update_interface_labels()
 
@@ -96,15 +98,65 @@ class FamilyTreeApp:
             self.btn_pt.config(bg="#38bdf8", fg="#0f172a")
             self.btn_en.config(bg="#334155", fg="#94a3b8")
 
+    def load_and_resize_image(self, image_name, size=(170, 170)):
+        """ Função responsável por carregar a imagem da pasta assets, redimensionar
+        usando Pillow e preparar para exibição no Tkinter de forma segura. """
+        if not image_name:
+            return None
+        try:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            img_path = os.path.join(base_dir, "assets", image_name)
+            if os.path.exists(img_path):
+                img = Image.open(img_path)
+                
+                # Definição padrão de centralização (meio do quadrado)
+                center_x = 0.5
+                center_y = 0.5
+                
+                if image_name == "foto_minha.jpeg":
+                    img = img.rotate(-90, expand=True)
+                
+                # Ajustes específicos de enquadramento vertical para evitar cortes de rostos
+                elif image_name == "foto_pai.JPG":
+                    center_y = 0.1  # Sobe o enquadramento para focar no topo da imagem e exibir o rosto do pai
+                elif image_name == "foto_avo1.JPG":
+                    center_y = 0.2  # Ajusta verticalmente para não cortar o topo da cabeça do avô
+                    
+                # Enquadra e corta as bordas sem esticar as pessoas utilizando o alinhamento calibrado
+                img = ImageOps.fit(img, size, Image.Resampling.LANCZOS, centering=(center_x, center_y))
+                return ImageTk.PhotoImage(img)
+        except Exception:
+            pass
+        return None
+
     def shrink_parent_node(self, member_id):
         """ Função que vai enconlher o card pai para otimizar o espaço visual quando novos cards surgem. """
 
         if member_id in self.active_widgets:
             widgets = self.active_widgets[member_id]
-            if 'bio_label' in widgets and widgets['bio_label'].winfo_exists():
-                widgets['bio_label'].pack_forget()
-            if 'img_label' in widgets and widgets['img_label'].winfo_exists():
-                widgets['img_label'].config(height=2, text="[ Mini Photo ]")
+            # Removendo o pack_forget da bio_label para garantir que a biografia nunca desapareça ao expandir novos membros
+
+    def check_all_members_expanded(self):
+        """ Monitora e verifica se todas as ramificações de familiares foram renderizadas na tela.
+        Caso positivo, injeta o botão especial do mascote 'Zezin' ao lado do botão da mãe. """
+
+        required_nodes = [
+            'father', 'mother', 'maternal_grandfather', 'maternal_grandmother', 
+            'uncle_maternal', 'cousin_maternal',
+            'paternal_sibling_1', 'paternal_sibling_2', 'paternal_sibling_3', 'paternal_sibling_4',
+            'maternal_sibling_1', 'maternal_sibling_2'
+        ]
+        
+        all_present = all(node in self.active_widgets for node in required_nodes)
+        
+        if all_present and self.me_btn_container and 'btn_zezin' not in self.active_widgets['me']['flow_buttons']:
+            is_pt = getattr(self.brain, 'current_lang', 'pt') == 'pt'
+            btn_text = "Ver Mascote" if is_pt else "View Pet"
+            
+            btn_z = tk.Button(self.me_btn_container, text=btn_text, bg="#10b981", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
+            btn_z.config(command=lambda: [btn_z.config(state=tk.DISABLED), self.render_member_node('zezin_mascote', row=5, column=4, parent_to_shrink='me')])
+            btn_z.pack(side=tk.LEFT, padx=4)
+            self.active_widgets['me']['flow_buttons']['btn_zezin'] = btn_z
 
     def render_member_node(self, member_id, row, column, parent_to_shrink=None):
         """ Função designada a gerar o conteúdo dos cards de TODOS os membros da família. """
@@ -112,15 +164,44 @@ class FamilyTreeApp:
         if parent_to_shrink:
             self.shrink_parent_node(parent_to_shrink)
             
-        node_frame = tk.LabelFrame(self.main_container, text=f" {self.brain.get_text(member_id)} ", 
+        # Tratamento especial de texto dinâmico para a caixa do animal de estimação extra.
+        if member_id == 'zezin_mascote':
+            is_pt = getattr(self.brain, 'current_lang', 'pt') == 'pt'
+            display_title = " Mascote " if is_pt else " Pet "
+        else:
+            display_title = f" {self.brain.get_text(member_id)} "
+
+        node_frame = tk.LabelFrame(self.main_container, text=display_title, 
                                 bg="white", font=self.card_title_font, fg="#0f172a", padx=15, pady=15, relief=tk.GROOVE)
         node_frame.grid(row=row, column=column, padx=20, pady=15, sticky="nsew")
         self.active_frames[member_id] = node_frame
         
-        img_label = tk.Label(node_frame, text="[ Photo Here ]", bg="#e2e8f0", width=24, height=6, fg="#475569", font=self.info_font)
+        # Recupera as informações estritamente ligadas ao mascote ou puxa do cérebro para familiares
+        if member_id == 'zezin_mascote':
+            info = {
+                'image': 'gato_zezin.jpeg',
+                'name': 'Zezin',
+                'age': '2 anos' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '2 years old',
+                'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
+            }
+        else:
+            info = self.brain.get_member_info(member_id)
+            
+        photo = self.load_and_resize_image(info.get('image'))
+        
+        if photo:
+            img_label = tk.Label(node_frame, image=photo, bg="#e2e8f0")
+            img_label.image = photo
+        else:
+            img_label = tk.Label(node_frame, text="[ Photo Here ]", bg="#e2e8f0", width=24, height=6, fg="#475569", font=self.info_font)
+            
         img_label.pack(pady=6)
         
-        info_btn = tk.Button(node_frame, text=self.brain.get_text('btn_show_info'), bg="#2563eb", fg="white", font=self.btn_font,
+        info_btn_text = self.brain.get_text('btn_show_info') if hasattr(self.brain, 'get_text') else "Ver Informações"
+        if member_id == 'zezin_mascote' and getattr(self.brain, 'current_lang', 'pt') == 'en':
+            info_btn_text = "Show Information"
+
+        info_btn = tk.Button(node_frame, text=info_btn_text, bg="#2563eb", fg="white", font=self.btn_font,
                             activebackground="#1d4ed8", activeforeground="white", relief=tk.FLAT, cursor="hand2", padx=8, pady=4)
         info_btn.config(command=lambda: self.reveal_member_details(member_id, node_frame, row, column, info_btn))
         info_btn.pack(pady=6)
@@ -132,28 +213,66 @@ class FamilyTreeApp:
             'details': [],
             'flow_buttons': {}
         }
+        
+        # Dispara verificação para avaliar se o botão do mascote já está elegível para surgir
+        self.check_all_members_expanded()
 
     def reveal_member_details(self, member_id, frame, row, column, btn_to_remove):
         """ Essa função vai obter os caminhos gerados a partir da função anterior e preencher com 
         com as informações do mini banco de dados criado no arquivo 'brain.py' """
 
-        btn_to_remove.pack_forget()
-        info = self.brain.get_member_info(member_id)
+        # Removido pack_forget para que o botão de mostrar informações permaneça visível para todos os cartões
+        if member_id == 'zezin_mascote':
+            info = {
+                'image': 'gato_zezin.jpeg',
+                'name': 'Zezin',
+                'age': '2 anos' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else '2 years old',
+                'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if getattr(self.brain, 'current_lang', 'pt') == 'pt' else 'The companion cat of the house, loves to sleep next to the keyboard.'
+            }
+        else:
+            info = self.brain.get_member_info(member_id)
         
-        lbl_name = tk.Label(frame, text=f"Name: {info.get('name')}", font=self.name_font, bg="white", fg="#0f172a", anchor="w")
+        # Sistema redundante de tradução segura para evitar exibição das chaves de texto cruas do arquivo 'brain.py'
+        is_pt = getattr(self.brain, 'current_lang', 'pt') == 'pt'
+        
+        fetched_name = self.brain.get_text('label_name') if hasattr(self.brain, 'get_text') else None
+        fetched_age = self.brain.get_text('label_age') if hasattr(self.brain, 'get_text') else None
+        
+        label_name_text = "Nome" if is_pt else "Name"
+        if fetched_name and fetched_name != 'label_name':
+            label_name_text = fetched_name
+            
+        label_age_text = "Idade" if is_pt else "Age"
+        if fetched_age and fetched_age != 'label_age':
+            label_age_text = fetched_age
+        
+        # Verifica se as labels já foram criadas para não duplicar elementos na tela ao clicar várias vezes
+        if 'name_label' in self.active_widgets[member_id] and self.active_widgets[member_id]['name_label'].winfo_exists():
+            self.active_widgets[member_id]['name_label'].config(text=f"{label_name_text}: {info.get('name')}")
+            self.active_widgets[member_id]['age_label'].config(text=f"{label_age_text}: {info.get('age')}")
+            self.active_widgets[member_id]['bio_label'].config(text=info.get('bio'))
+            return
+
+        lbl_name = tk.Label(frame, text=f"{label_name_text}: {info.get('name')}", font=self.name_font, bg="white", fg="#0f172a", anchor="w")
         lbl_name.pack(fill=tk.X, pady=2)
         
-        lbl_age = tk.Label(frame, text=f"Age: {info.get('age')}", font=self.info_font, bg="white", fg="#475569", anchor="w")
+        lbl_age = tk.Label(frame, text=f"{label_age_text}: {info.get('age')}", font=self.info_font, bg="white", fg="#475569", anchor="w")
         lbl_age.pack(fill=tk.X, pady=2)
         
         lbl_bio = tk.Label(frame, text=info.get('bio'), font=self.bio_font, bg="white", fg="#64748b", wraplength=210, justify=tk.LEFT)
         lbl_bio.pack(fill=tk.X, pady=6)
         
+        self.active_widgets[member_id]['name_label'] = lbl_name
+        self.active_widgets[member_id]['age_label'] = lbl_age
         self.active_widgets[member_id]['bio_label'] = lbl_bio
         self.active_widgets[member_id]['details'].extend([lbl_name, lbl_age])
         
         btn_container = tk.Frame(frame, bg="white")
         btn_container.pack(pady=6)
+        
+        # Armazena a referência global do container da sua caixa para injetar o mascote posteriormente à direita
+        if member_id == 'me':
+            self.me_btn_container = btn_container
         
         # Lógica de Fluxo e Direcionamento da Cascata
         if member_id == 'me':
@@ -166,6 +285,9 @@ class FamilyTreeApp:
             btn_m.config(command=lambda: [btn_m.config(state=tk.DISABLED), self.render_member_node('mother', row-1, column+1, 'me')])
             btn_m.pack(side=tk.LEFT, padx=4)
             self.active_widgets[member_id]['flow_buttons']['btn_mother'] = btn_m
+            
+            # Segunda checagem caso o usuário expanda as ramificações e depois clique em mostrar informações de "Me" por último
+            self.check_all_members_expanded()
             
         elif member_id == 'father':
             btn_sib = tk.Button(btn_container, text=self.brain.get_text('btn_siblings'), bg="#10b981", fg="white", font=self.btn_font, relief=tk.FLAT, cursor="hand2")
@@ -214,19 +336,55 @@ class FamilyTreeApp:
 
         for member_id, data in list(self.active_widgets.items()):
             if data['frame'].winfo_exists():
-                data['frame'].config(text=f" {self.brain.get_text(member_id)} ")
+                is_pt = getattr(self.brain, 'current_lang', 'pt') == 'pt'
+                
+                # Tradução dinâmica e robusta para o card do animal
+                if member_id == 'zezin_mascote':
+                    data['frame'].configure(text=" Mascote " if is_pt else " Pet ")
+                else:
+                    data['frame'].configure(text=f" {self.brain.get_text(member_id)} ")
                 
                 if 'info_btn' in data and data['info_btn'].winfo_exists():
-                    data['info_btn'].config(text=self.brain.get_text('btn_show_info'))
+                    info_btn_label = self.brain.get_text('btn_show_info') if hasattr(self.brain, 'get_text') else "Ver Informações"
+                    if member_id == 'zezin_mascote' and not is_pt:
+                        info_btn_label = "Show Information"
+                    data['info_btn'].configure(text=info_btn_label)
                     
-                if 'bio_label' in data and data['bio_label'].winfo_exists():
+                fetched_name = self.brain.get_text('label_name') if hasattr(self.brain, 'get_text') else None
+                fetched_age = self.brain.get_text('label_age') if hasattr(self.brain, 'get_text') else None
+                
+                label_name_text = "Nome" if is_pt else "Name"
+                if fetched_name and fetched_name != 'label_name':
+                    label_name_text = fetched_name
+                    
+                label_age_text = "Idade" if is_pt else "Age"
+                if fetched_age and fetched_age != 'label_age':
+                    label_age_text = fetched_age
+                    
+                if member_id == 'zezin_mascote':
+                    info = {
+                        'image': 'gato_zezin.jpeg',
+                        'name': 'Zezin',
+                        'age': '2 anos' if is_pt else '2 years old',
+                        'bio': 'O gato companheiro da casa, adora dormir ao lado do teclado.' if is_pt else 'The companion cat of the house, loves to sleep next to the keyboard.'
+                    }
+                else:
                     info = self.brain.get_member_info(member_id)
-                    data['bio_label'].config(text=info.get('bio'))
+
+                if 'name_label' in data and data['name_label'].winfo_exists():
+                    data['name_label'].configure(text=f"{label_name_text}: {info.get('name')}")
+                if 'age_label' in data and data['age_label'].winfo_exists():
+                    data['age_label'].configure(text=f"{label_age_text}: {info.get('age')}")
+                if 'bio_label' in data and data['bio_label'].winfo_exists():
+                    data['bio_label'].configure(text=info.get('bio'))
                     
                 if 'flow_buttons' in data:
                     for btn_key, btn_obj in data['flow_buttons'].items():
                         if btn_obj.winfo_exists():
-                            btn_obj.config(text=self.brain.get_text(btn_key))
+                            if btn_key == 'btn_zezin':
+                                btn_obj.configure(text="Ver Mascote" if is_pt else "View Pet")
+                            else:
+                                btn_obj.configure(text=self.brain.get_text(btn_key))
 
                
 if __name__ == "__main__":
